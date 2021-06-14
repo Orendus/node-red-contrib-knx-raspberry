@@ -10,6 +10,10 @@
       "knx-comm": "knx-raspberry/knx-comm.js"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Orendus/node-red-contrib-knx-raspberry"
+  },
   "author": "Orendus",
   "license": "MIT",
   "dependencies": {
