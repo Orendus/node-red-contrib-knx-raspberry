@@ -1,0 +1,19 @@
+{
+  "name": "node-red-contrib-knx-raspberry",
+  "version": "1.0.3",
+  "keywords": [
+    "node-red"
+  ],
+  "node-red": {
+    "nodes": {
+      "knx-object": "knx-raspberry/knx-object.js",
+      "knx-comm": "knx-raspberry/knx-comm.js"
+    }
+  },
+  "author": "Orendus",
+  "license": "MIT",
+  "dependencies": {
+    "knx-datapoints": "^1.1.2",
+    "serialport": "^9.1.0"
+  }
+}

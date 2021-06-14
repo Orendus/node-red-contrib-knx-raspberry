@@ -1,0 +1,303 @@
+<script type="text/javascript">
+    RED.nodes.registerType("knx-object",{
+        category: 'Raspberry',
+        color: '#449e22',
+        defaults: {
+            name: {value:""},
+            grp: {value:"", required:true, validate: function(v){
+                return v.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)[0] == v
+            }},
+            dpt: {value:"", required:true},
+            serialport:{value:"", type:"knx-comm", required:true}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "KNX_logo.svg",
+        label: function() {
+            return this.name+' '+this.grp  ||'knx-object '+this.grp;
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="knx-object">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-serialport"><i class="fa fa-random"></i> Serial Port</label>
+        <input type="text" id="node-input-serialport">
+    </div>
+    <div class="form-row">
+        <label for="node-input-grp"><i class="fa fa-object-group"></i> Grp. Address</label>
+        <input type="text" id="node-input-grp" placeholder="0/0/0">
+    </div>
+    <div class="form-row">
+        <label for="node-input-dpt"><i class="fa fa-bars"></i> DataPoint</label>
+        <select id="node-input-dpt" name="node-input-dpt">
+            <optgroup label="1 Bit">
+                <option value="1.001">1.001 Switch</option>
+                <option value="1.002">1.002 Bool</option>
+                <option value="1.003">1.003 Enable</option>
+                <option value="1.004">1.004 Ramp</option>
+                <option value="1.005">1.005 Alarm</option>
+                <option value="1.006">1.006 BinaryValue</option>
+                <option value="1.007">1.007 Step</option>
+                <option value="1.008">1.008 Up/Down</option>
+                <option value="1.009">1.009 Open/Close</option>
+                <option value="1.010">1.010 Start/Stop</option>
+                <option value="1.011">1.011 State</option>
+                <option value="1.012">1.012 Invert</option>
+                <option value="1.013">1.013 Dim Send Style</option>
+                <option value="1.014">1.014 Input Source</option>
+                <option value="1.015">1.015 Reset</option>
+                <option value="1.016">1.016 Ack</option>
+                <option value="1.017">1.017 Trigger</option>
+                <option value="1.018">1.018 Occupancy</option>
+                <option value="1.019">1.019 Window/Door</option>
+                <option value="1.021">1.021 Logical Function</option>
+                <option value="1.022">1.022 Scene</option>
+                <option value="1.023">1.023 Shutter/Blinds Mode</option>
+                <option value="1.100">1.100 Cooling/Heating</option>
+            </optgroup>
+            <optgroup label="1 Bit Controlled">
+                <option value="2.001">2.001 Switch Control</option>
+                <option value="2.002">2.002 Bool Control</option>
+                <option value="2.003">2.003 Enable Control</option>
+                <option value="2.004">2.004 Ramp Control</option>
+                <option value="2.005">2.005 Alarm Control</option>
+                <option value="2.006">2.006 Binary Control</option>
+                <option value="2.007">2.007 Step Control</option>
+                <option value="2.008">2.008 Direction 1 Control</option>
+                <option value="2.009">2.009 Direction 2 Control</option>
+                <option value="2.010">2.010 Start Control</option>
+                <option value="2.011">2.011 State Control</option>
+                <option value="2.012">2.012 Invert Control</option>
+            </optgroup>
+            <optgroup label="3 Bit Controlled">
+                <option value="3.007">3.007 Control Dimming</option>
+                <option value="3.008">3.008 Control Blinds</option>
+            </optgroup>
+            <optgroup label="Character">
+                <option value="4.001">4.001 Char (ASCII)</option>
+                <option value="4.002">4.002 Char ISO (8859-1)</option>
+            </optgroup>
+            <optgroup label="8 Bit Unsigned Value">
+                <option value="5.001">5.001 Percent (0..100%)</option>
+                <option value="5.003">5.001 Angle (Degrees)</option>
+                <option value="5.004">5.001 Percent (0..255%)</option>
+                <option value="5.005">5.001 Ratio (0..255)</option>
+                <option value="5.006">5.001 Tariff (0..255)</option>
+                <option value="5.010">5.001 Counter Pulses (0..255)</option>
+            </optgroup>
+            <optgroup label="8 Bit Signed Value">
+                <option value="6.001">6.001 Percent (-128..127%)</option>
+                <option value="6.010">6.010 Counter Pulses (-127..127)</option>
+                <option value="6.020">6.020 Status With Mode</option> 
+            </optgroup>
+            <optgroup label="2 Byte Unsigned Value">
+                <option value="7.001">7.001 Pulses</option>
+                <option value="7.002">7.002 Time (ms)</option>
+                <option value="7.003">7.003 Time (10ms)</option>
+                <option value="7.004">7.004 Time (100ms)</option>
+                <option value="7.005">7.005 Time (s)</option>
+                <option value="7.006">7.006 Time (m)</option>
+                <option value="7.007">7.007 Time (h)</option>
+                <option value="7.010">7.010 Property Data Type</option>
+                <option value="7.011">7.011 Length (mm)</option>
+                <option value="7.012">7.012 Current (mA)</option>
+                <option value="7.013">7.013 Brightness (lux)</option>
+            </optgroup>
+            <optgroup label="2 Byte Signed Value">
+                <option value="8.001">8.001 Pulses difference</option>
+                <option value="8.002">8.002 Delta Time (ms)</option>
+                <option value="8.003">8.003 Delta Time (10ms)</option>
+                <option value="8.004">8.004 Delta Time (100ms)</option>
+                <option value="8.005">8.005 Delta Time (s)</option>
+                <option value="8.006">8.006 Delta Time (m)</option>
+                <option value="8.007">8.007 Delta Time (h)</option>
+                <option value="8.010">8.010 Percentage Difference (%)</option>
+                <option value="8.011">8.011 Rotation Angle (°)</option>
+            </optgroup>
+            <optgroup label="2 Byte Float Value">
+                <option value="9.001">9.001 Temperature (°C)</option>
+                <option value="9.002">9.002 Temperature Difference (K)</option>
+                <option value="9.003">9.003 Kelvin/Hours (K/h)</option>
+                <option value="9.004">9.004 Lux (Lux)</option>
+                <option value="9.005">9.005 Speed (m/s)</option>
+                <option value="9.006">9.006 Pressure (Pa)</option>
+                <option value="9.007">9.007 Humidity (%)</option>
+                <option value="9.008">9.008 Air Quality (ppm)</option>
+                <option value="9.010">9.010 Time (s)</option>
+                <option value="9.011">9.011 Time (ms)</option>
+                <option value="9.020">9.020 Voltage (mV)</option>
+                <option value="9.021">9.021 Current (mA)</option>
+                <option value="9.022">9.022 Power Density (W/mq)</option>
+                <option value="9.023">9.023 Kelvin/Percent (K/%)</option>
+                <option value="9.024">9.024 Power (kW)</option>
+                <option value="9.025">9.025 Volume Flow (l/h)</option>
+                <option value="9.026">9.026 Rain Amount (l/mq)</option>
+                <option value="9.027">9.027 Temperature (°F)</option>
+                <option value="9.028">9.028 Wind Speed (km/h)</option>
+            </optgroup>
+            <optgroup label="Time">
+                <option value="10.001">10.001 Time Of Day ()</option>
+            </optgroup>
+            <optgroup label="Date">
+                <option value="11.001">11.001 Date ()</option>
+            </optgroup>
+            <optgroup label="4 Byte Unsigned Value">
+                <option value="12.001">12.001 Pulses</option>
+            </optgroup>
+            <optgroup label="4 Byte Signed Value">
+                <option value="13.001">13.001 Pulses</option>
+                <option value="13.002">13.002 Flow Rate (m3/h)</option>
+                <option value="13.010">13.010 Active Energy (Wh)</option>
+                <option value="13.011">13.011 Apparant Energy (VAh)</option>
+                <option value="13.012">13.012 Reactive Energy (VARh)</option>
+                <option value="13.013">13.013 Active Energy (kWh)</option>
+                <option value="13.014">13.014 Apparant Energy (kVAh)</option>
+                <option value="13.015">13.015 Reactive Energy (kVARh)</option>
+                <option value="13.100">13.100 Delta Time (s)</option>
+            </optgroup>
+            <optgroup label="4 Byte Float Value">
+                <option value="14.000">14.000 Acceleration (m/s2)</option>
+                <option value="14.001">14.001 Acceleration_Angular (rad/s2)</option>
+                <option value="14.002">14.002 Activation_Energy (J/mol)</option>
+                <option value="14.003">14.003 Activity (1/s)</option>
+                <option value="14.004">14.004 Amount of substance (mol)</option>
+                <option value="14.005">14.005 Amplitude</option>
+                <option value="14.006">14.006 Angle (radiant)</option>
+                <option value="14.007">14.007 Angle (degree)</option>
+                <option value="14.008">14.008 Angular Momentum (Js)</option>
+                <option value="14.009">14.009 Angular Velocity (rad/s)</option>
+                <option value="14.010">14.010 Area (m*m)</option>
+                <option value="14.011">14.011 Capacitance (F)</option>
+                <option value="14.012">14.012 flux Density (C/m2)</option>
+                <option value="14.013">14.013 Charge Density (C/m3)</option>
+                <option value="14.014">14.014 Compressibility (M2/N)</option>
+                <option value="14.015">14.015 Conductance (S)</option>
+                <option value="14.016">14.016 Electrical Conductivity (S/m)</option>
+                <option value="14.017">14.017 Density (kg/m3)</option>
+                <option value="14.018">14.018 Electric Charge (C)</option>
+                <option value="14.019">14.019 Electric Current (A)</option>
+                <option value="14.020">14.020 Electric Current Density (A/m2)</option>
+                <option value="14.021">14.021 Electric Dipole Moment (Cm)</option>
+                <option value="14.022">14.022 Electric Displacement (C/m2)</option>
+                <option value="14.023">14.023 Electric Field Strength (V/m)</option>
+                <option value="14.024">14.024 Electric Flux (C)</option>
+                <option value="14.025">14.025 Electric Flux Density (C/m2)</option>
+                <option value="14.026">14.026 Electric Polarization (C/m2)</option>
+                <option value="14.027">14.027 Electric Potential (V)</option>
+                <option value="14.028">14.028 Electric Potential Difference (V)</option>
+                <option value="14.029">14.029 Electromagnetic Moment (Am2)</option>
+                <option value="14.030">14.030 Electromotive Force (V)</option>
+                <option value="14.031">14.031 Energy (J)</option>
+                <option value="14.032">14.032 Force (N)</option>
+                <option value="14.033">14.033 Frequency (Hz)</option>
+                <option value="14.034">14.034 Angular Frequency (rad/s)</option>
+                <option value="14.035">14.035 Heat Capacity (J/K)</option>
+                <option value="14.036">14.036 Heat Flow Rate (W)</option>
+                <option value="14.037">14.037 Heat Quantity</option>
+                <option value="14.038">14.038 Impedance (Ω)</option>
+                <option value="14.039">14.039 Length (m)</option>
+                <option value="14.040">14.040 Light Quantity (J)</option>
+                <option value="14.041">14.041 Luminance (cd/m2)</option>
+                <option value="14.042">14.042 Luminous Flux (lm)</option>
+                <option value="14.043">14.043 Luminous Intensity (cd)</option>
+                <option value="14.044">14.044 Magnetic Field Strength (A/m)</option>
+                <option value="14.045">14.045 Magnetic Flux (Wb)</option>
+                <option value="14.046">14.046 Magnetic Flux Density (T)</option>
+                <option value="14.047">14.047 Magnetic Moment (Am2)</option>
+                <option value="14.048">14.048 Magnetic Polarization (T)</option>
+                <option value="14.049">14.049 Magnetization (A/m)</option>
+                <option value="14.050">14.050 Magnetomotive Force (A)</option>
+                <option value="14.051">14.051 Mass (kg)</option>
+                <option value="14.052">14.052 Mass Flux (kg/s)</option>
+                <option value="14.053">14.053 Momentum (N/s)</option>
+                <option value="14.054">14.054 Phase Angle (rad)</option>
+                <option value="14.055">14.055 Phase_Angle (°)</option>
+                <option value="14.056">14.056 Power (W)</option>
+                <option value="14.057">14.057 Power Factor (cos ϕ)</option>
+                <option value="14.058">14.058 Pressure (Pa)</option>
+                <option value="14.059">14.059 Reactance (Ω)</option>
+                <option value="14.060">14.060 Resistance (Ω)</option>
+                <option value="14.061">14.061 Resistivity (Ωm)</option>
+                <option value="14.062">14.062 Self Inductance (H)</option>
+                <option value="14.063">14.063 Solid Angle (sr)</option>
+                <option value="14.064">14.064 Sound Intensity (W/m2)</option>
+                <option value="14.065">14.065 Speed (m/s)</option>
+                <option value="14.066">14.066 Stress (Pa)</option>
+                <option value="14.067">14.067 Surface Tension (N/m)</option>
+                <option value="14.068">14.068 Temperature (°C)</option>
+                <option value="14.069">14.069 Absolute Temperature (K)</option>
+                <option value="14.070">14.070 Temperature Difference (K)</option>
+                <option value="14.071">14.071 Thermal Capacity (J/K)</option>
+                <option value="14.072">14.072 Thermal Conductivity (W/mK)</option>
+                <option value="14.073">14.073 Thermoelectric Power (V/k)</option>
+                <option value="14.074">14.074 Time (s)</option>
+                <option value="14.075">14.075 Torque (Nm)</option>
+                <option value="14.076">14.076 Volume (m3)</option>
+                <option value="14.077">14.077 Volume Flux (m3/s)</option>
+                <option value="14.078">14.078 Weight (N)</option>
+                <option value="14.079">14.079 Work (J)</option>
+            </optgroup>
+            <optgroup label="Entrance Access">
+                <option value="15.000">Access Data</option>
+            </optgroup>
+            <optgroup label="Character String">
+                <option value="16.000">16.000 String (ASCII)</option>
+                <option value="16.001">16.001 String (ISO 8859-1)</option>
+            </optgroup>
+            <optgroup label="Scene Number">
+                <option value="17.001">17.001 Scene Number</option>
+            </optgroup>
+            <optgroup label="Scene Control">
+                <option value="18.001">18.001 Scene Control</option>
+            </optgroup>
+            <optgroup label="Date Time">
+                <option value="19.001">19.001 Date Time</option>
+            </optgroup>
+            <optgroup label="1 Byte">
+                <option value="20.001">20.001 SCLO Mode</option>
+                <option value="20.002">20.002 Building Mode</option>
+                <option value="20.003">20.003 Occupied</option>
+                <option value="20.004">20.004 Priority</option>
+                <option value="20.005">20.005 Light Application Mode</option>
+                <option value="20.006">20.006 Light Application Area</option>
+                <option value="20.007">20.007 Alarm Class</option>
+                <option value="20.008">20.008 PSU Mode</option>
+                <option value="20.011">20.011 System Error Class</option>
+                <option value="20.012">20.012 HVAC Error Class</option>
+                <option value="20.013">20.013 Time Delay</option>
+                <option value="20.014">20.014 Wind Force Scale (0..12)</option>
+                <option value="20.017">20.017 Sensor Mode</option>
+                <option value="20.020">20.020 Actuator Connect Type</option>
+                <option value="20.100">20.100 Fuel Type</option>
+                <option value="20.101">20.101 Burner Type</option>
+                <option value="20.102">20.102 HVAC Mode</option>
+                <option value="20.103">20.103 DHW Mode</option>
+                <option value="20.104">20.104 Load Priority</option>
+                <option value="20.105">20.105 HVAC Control Mode</option>
+                <option value="20.106">20.106 HVAC Emergency Mode</option>
+                <option value="20.107">20.107 Changeover Mode</option>
+                <option value="20.108">20.108 Valve Mode</option>
+                <option value="20.109">20.109 Damper Mode</option>
+                <option value="20.110">20.110 Heater Mode</option>
+                <option value="20.111">20.111 Fan Mode</option>
+                <option value="20.112">20.112 Master/Slave Mode</option>
+                <option value="20.113">20.113 Status Room Setpoint</option>
+                <option value="20.120">20.120 ADA Type</option>
+                <option value="20.121">20.121 Backup Mode</option>
+                <option value="20.122">20.122 Start Synchronization Type</option>
+            </optgroup>
+            <optgroup label="3 Byte Colour RGB">
+                <option value="232.600">232.600 RGB Value 3x(0..255)</option>
+            </optgroup>
+        </select>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="knx-object">
+    <p>Comunicare col KNX tramite l'HAT di Eelectron per Raspberry Pi</p>
+</script>

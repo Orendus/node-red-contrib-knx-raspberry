@@ -1,0 +1,45 @@
+<script type="text/javascript">
+    RED.nodes.registerType('knx-comm',{
+        category: 'config',
+        defaults: {
+            name: {value:""},
+            serialport: {value:"",required:true},
+        },
+        label: function() {
+            return this.name || "KNX Hat for Raspberry Pi"
+        },
+        oneditprepare: () => {
+
+            $("#node-config-lookup-serial").click(function() {
+                $("#node-config-lookup-serial").addClass('disabled');
+                $.getJSON('serialports',function(data) {
+                    $("#node-config-lookup-serial").removeClass('disabled');
+                    var ports = data || [];
+                    $("#node-config-input-serialport").autocomplete({
+                        source:ports,
+                        minLength:0,
+                        close: function( event, ui ) {
+                            $("#node-config-input-serialport").autocomplete( "destroy" );
+                        }
+                    }).autocomplete("search","");
+                });
+            })
+        }
+    })
+</script>
+
+<script type="text/html" data-template-name="knx-comm">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="KNX Hat for Raspberry Pi">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-serialport"><i class="fa fa-random"></i> Serial Port</label>
+        <input type="text" id="node-config-input-serialport" style="width:66%;" placeholder="/dev/ttyS0">
+        <a id="node-config-lookup-serial" class="red-ui-button"><i id="node-config-lookup-serial-icon" class="fa fa-search"></i></a>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="knx-comm">
+    <p>Set the communication with Eeelectron HAT trough Serial Port</p>
+</script>
