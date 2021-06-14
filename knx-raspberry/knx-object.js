@@ -12,19 +12,25 @@ module.exports = function(RED) {
         //instance communication with serialPort
         this.serial = RED.nodes.getNode(config.serialport)
         this.port = this.serial.serial
+        this.parser = this.serial.parser
+
         
         this.on('input', function(m) {
+            if((this.grp == undefined || this.grp == null ||  this.grp == '') && m.group!=undefined && m.group!=null && m.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)) //group address
+            {
+                this.grp = (m.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)[0]==m.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/).input) ? m.goup : this.grp
+            }
+            if((this.dpt == undefined || this.dpt == null ||  this.dpt == '') && m.datapoint!=undefined && m.datapoint!=null && m.datapoint.match(/\d{1,3}.\d{1,3}/))//group address
+            {
+                this.dpt = (m.datapoint.match(/\d{1,3}.\d{1,3}/)[0]==m.group.match(/\d{1,3}.\d{1,3}/).input) ? m.datapoint : this.dpt
+            }
             if(m.topic=='read')
             {
-                 this.port.write(pollKnx(this.grp))
+                this.port.write(pollKnx(this.grp))
 
             }
             else
             {
-                if(m.topic!=undefined && m.topic!=null && m.topic.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)) //group address
-                {
-                    this.grp = (m.topic.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)[0]==m.topic.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/).input) ? m.topic : this.grp
-                }
                 this.port.write(writeKnx(m.payload,this.grp,this.dpt))
             }
         })
@@ -39,10 +45,13 @@ module.exports = function(RED) {
                 this.status({fill:"red",shape:"dot",text:"not connected"});
             })
 
-            this.port.on('data',(m) => {
-                const message = {payload:readKnx(m,this.grp,this.dpt),topic:this.grp}
+            this.parser.on('data',(m) => {
 
-                if(message.payload!=null && message.payload!=undefined) this.send(message)
+                const message = readKnx(m.toJSON().data,this.grp,this.dpt)
+
+                if(message!=null && message!=undefined) this.send(message)
+        
+            
             })
         }
         else
@@ -84,13 +93,10 @@ module.exports = function(RED) {
         function readKnx(msg,group,datapoint) {
             const STX = String.fromCharCode(0x2)
             const ETX = String.fromCharCode(0x3)
-            
             const message = msg.filter(el => el!= 0 && el!=2 && el!=3)
-                            .toString()
-                            .split('')
+                            .map(el => String.fromCharCode(el))
                             .reduce((a,c,i,ar) => a+c+(i%2==1 && i<ar.length-1 ?',':''))
                             .split(',')
-                            
                             
             const crc = message.pop()
             
@@ -100,8 +106,9 @@ module.exports = function(RED) {
             const sourceLowByte = parseInt(message.shift(),16)
             const grpHiByte = parseInt(message.shift(),16)
             const grpLowByte = parseInt(message.shift(),16)
-            let mess = {}
             
+            let mess = {}
+
             function getSourceAddr(hiByte,lowByte){
                 return (hiByte>>4&0xF).toString()+'.'+(hiByte&0x0F).toString()+'.'+lowByte.toString()
             }
@@ -136,13 +143,37 @@ module.exports = function(RED) {
                         grp : getTargetAddr(grpHiByte,grpLowByte),
                         val : message
                     }
-                    break
+                    
+                    if(group != '' && group != undefined &&  group != null) //group address defined
+                    {
+                        if(mess.grp == group)
+                        {
+                            let value
+                            if(datapoint)
+                            {
+                                value = knxDatapoints.decode(datapoint, Buffer.from(mess.val.map(a => parseInt(a,16)),'hex'))
+                            }
+                            else
+                            {
+                                value = mess.val.map(a => parseInt(a,16))
+                            }
+                            return {payload:value, group:mess.grp, source:mess.src}
+                        }
+                    }
+                    else
+                    {
+                        let value
+                        if(datapoint)
+                        {
+                            value = knxDatapoints.decode(datapoint, Buffer.from(mess.val.map(a => parseInt(a,16)),'hex'))
+                        }
+                        else
+                        {
+                            value = mess.val.map(a => parseInt(a,16))
+                        }
+                        return {payload:value, group:mess.grp, source:mess.src}
+                    }
                 }
-            }
-            if(mess.grp == group)
-            {
-                let value = mess.val.map(a => parseInt(a,16))
-                return knxDatapoints.decode(datapoint, Buffer.from(value,'hex'))
             }
         }
 

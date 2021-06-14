@@ -7,11 +7,13 @@ module.exports = function(RED) {
         this.port = config.serialport;
 
         const SerialPort = require('serialport')
+        const Delimiter = require('@serialport/parser-delimiter')
 
         this.serial = new SerialPort(this.port, {
             baudRate: 19200
         })
 
+        this.parser = this.serial.pipe(new Delimiter({ delimiter: [0x03], includeDelimiter: true}))
 
         //Query for avaible serial ports
         RED.httpAdmin.get("/serialports", RED.auth.needsPermission('serial.read'), function(req,res) {
