@@ -1,9 +1,7 @@
 module.exports = function(RED) {
-
     function KnxCommNode(config) {
-
         RED.nodes.createNode(this,config);
-
+        
         this.port = config.serialport;
 
         const SerialPort = require('serialport')
@@ -27,13 +25,9 @@ module.exports = function(RED) {
                 }
             )
         });
-    
-
         this.on('close',() => {
             this.serial.close()
         })
-
     }
-    
     RED.nodes.registerType("knx-comm",KnxCommNode);
 }
