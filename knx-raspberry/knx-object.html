@@ -307,5 +307,37 @@
 </script>
 
 <script type="text/html" data-help-name="knx-object">
-    <p>Comunicare col KNX tramite l'HAT di Eelectron per Raspberry Pi</p>
+    <p>Communicate with KNX bus through Eelectron IC00R01KNX, an interface for Raspberry Pi</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>payload
+            <span class="property-type">Boolean | Number</span>
+        </dt>
+        <dd> The value you want to send to KNX bus. </dd>
+        <dt class="optional">topic <span class="property-type">string</span></dt>
+        <dd> If you want to poll a value to KNX bus, send the string "read" as topic.</dd>
+    </dl>
+
+    <h3>Outputs</h3>
+        <ol class="node-ports">
+            <li>Output
+                <dl class="message-properties">
+                    <dt>payload <span class="property-type">Boolean | Number | Array</span></dt>
+                    <dd>The value received from KNX bus. If "Datapoint" parameter was setted, the value will take the relative format</dd>
+                    <dt class="optional">group <span class="property-type">String</span></dt>
+                    <dd>The group address received from knx bus</dd>
+                    <dt class="optional">source <span class="property-type">String</span></dt>
+                    <dd>The individual address of device that sent the message on knx bus</dd>
+                </dl>
+            </li>
+        </ol>
+
+    <h3>Details</h3>
+        <p>If no "Grp.Address" was setted in parameters, all values received from knx bus will be parsed by the node. Setting the "Grp.Address" parameter, will filter messages</p>
+
+    <h3>References</h3>
+        <ul>
+            <li><a href="https://github.com/Orendus/node-red-contrib-knx-raspberry">GitHub</a> - the nodes github repository</li>
+        </ul>
+
 </script>
