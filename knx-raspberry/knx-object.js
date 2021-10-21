@@ -67,7 +67,7 @@ module.exports = function(RED) {
 
             const CTRLFLD = "82" //Control Field
 
-            let telegramInfo = String(6 + (DPT < 9)).padStart(2,0)
+            let telegramInfo = String(6 + (DPT < 5)).padStart(2,0)
 
             //target address
             let targetHiByte = ((TARGET[0]<<3)+TARGET[1]).toString(16).padStart(2,0)
