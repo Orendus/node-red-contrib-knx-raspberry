@@ -33,6 +33,7 @@ module.exports = function(RED) {
             else
             {
                 this.port.write(writeKnx(m.payload,this.grp,this.dpt))
+                this.send(writeKnx(m.payload,this.grp,this.dpt))
             }
         })
         if(this.serial)
