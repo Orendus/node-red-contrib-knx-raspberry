@@ -14,45 +14,24 @@ module.exports = function(RED) {
         this.port = this.serial.serial
         this.parser = this.serial.parser
 
-        this.buffermessages = []
         
-        this.on('input', function(m) {
-
-            this.buffermessages.push(m)
-
-            if(this.buffermessages.length==1){
-              parse()
+        this.on('input', function(m) { 
+            if((this.grp == undefined || this.grp == null ||  this.grp == '') && m.group!=undefined && m.group!=null && m.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)) //group address
+            {
+                this.grp = (m.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)[0] == m.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/).input) ? m.goup : this.grp
             }
-            
-            function parse(){
-              setTimeout(() => {
-                let mes = this.buffermessages.shift()
+            if((this.dpt == undefined || this.dpt == null ||  this.dpt == '') && m.datapoint!=undefined && m.datapoint!=null && m.datapoint.match(/\d{1,3}.\d{1,3}/))//datapoint
+            {
+                this.dpt = (m.datapoint.match(/\d{1,3}.\d{1,3}/)[0] == m.group.match(/\d{1,3}.\d{1,3}/).input) ? m.datapoint : this.dpt
+            }
+            if(m.topic=='read')
+            {
+                this.port.write(pollKnx(this.grp))
 
-                if((this.grp == undefined || this.grp == null ||  this.grp == '') && mes.group!=undefined && mes.group!=null && mes.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)) //group address
-                {
-                    this.grp = (mes.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/)[0] == mes.group.match(/\d{1,2}\/\d{1,2}\/\d{1,3}/).input) ? mes.goup : this.grp
-                }
-                if((this.dpt == undefined || this.dpt == null ||  this.dpt == '') && mes.datapoint!=undefined && mes.datapoint!=null && mes.datapoint.match(/\d{1,3}.\d{1,3}/))//datapoint
-                {
-                    this.dpt = (mes.datapoint.match(/\d{1,3}.\d{1,3}/)[0] == mes.group.match(/\d{1,3}.\d{1,3}/).input) ? mes.datapoint : this.dpt
-                }
-                if(mes.topic=='read')
-                {
-                    this.port.write(pollKnx(this.grp))
-    
-                }
-                else
-                {
-                    this.port.write(writeKnx(mes.payload,this.grp,this.dpt))
-                }
-    
-
-
-                if(this.buffermessages.length>0)
-                {
-                  parse()
-                }
-              },100)
+            }
+            else
+            {
+                this.port.write(writeKnx(m.payload,this.grp,this.dpt))
             }
 
         })
